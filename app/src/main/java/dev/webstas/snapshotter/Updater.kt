@@ -11,7 +11,7 @@ import java.net.URL
 
 /** Checks the GitHub releases of this project and installs a newer APK through the system installer. */
 object Updater {
-    private const val LATEST_RELEASE = "https://api.github.com/repos/BigWebstas/Progressive-Snapshotter/releases/latest"
+    private const val LATEST_RELEASE = "https://api.github.com/repos/BigWebstas/Progressive-Snapshot-Reviewer/releases/latest"
 
     class Release(val version: String, val apkUrl: String)
 
