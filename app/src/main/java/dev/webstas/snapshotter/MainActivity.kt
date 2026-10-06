@@ -2,6 +2,7 @@ package dev.webstas.snapshotter
 
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +11,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
@@ -37,6 +39,8 @@ class MainActivity : AppCompatActivity() {
             SnapshotService.instance?.stop()
             refresh()
         }
+        findViewById<View>(R.id.update_button).setOnClickListener { onUpdateButton() }
+        checkForUpdates()
     }
 
     override fun onResume() {
@@ -67,6 +71,44 @@ class MainActivity : AppCompatActivity() {
         tile(R.id.tile_changed).first.text = run.changed.toString()
         tile(R.id.tile_skipped).first.text = run.skipped.toString()
         tile(R.id.tile_elapsed).first.text = "%d:%02d".format(seconds / 60, seconds % 60)
+    }
+
+    private val currentVersion get() = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty()
+    private var available: Updater.Release? = null
+
+    private fun setUpdate(text: String, button: Int) {
+        findViewById<TextView>(R.id.update_text).text = text
+        findViewById<MaterialButton>(R.id.update_button).setText(button)
+    }
+
+    private fun checkForUpdates() {
+        setUpdate(getString(R.string.update_checking), R.string.check_updates)
+        Thread {
+            val latest = Updater.fetchLatest()
+            runOnUiThread {
+                available = latest?.takeIf { Updater.isNewer(it.version, currentVersion) }
+                when {
+                    latest == null -> setUpdate(getString(R.string.update_check_failed), R.string.check_updates)
+                    available == null -> setUpdate(getString(R.string.update_current, currentVersion), R.string.check_updates)
+                    else -> setUpdate(getString(R.string.update_available, latest.version, currentVersion), R.string.install_update)
+                }
+            }
+        }.start()
+    }
+
+    private fun onUpdateButton() {
+        val release = available ?: return checkForUpdates()
+        if (!packageManager.canRequestPackageInstalls()) {
+            Toast.makeText(this, R.string.allow_installs, Toast.LENGTH_LONG).show()
+            startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName")))
+            return
+        }
+        setUpdate(getString(R.string.update_downloading, release.version), R.string.install_update)
+        Thread {
+            runCatching { Updater.install(applicationContext, release) }.onFailure {
+                runOnUiThread { setUpdate(getString(R.string.update_failed, it.message.orEmpty()), R.string.install_update) }
+            }
+        }.start()
     }
 
     /** Read from settings rather than the live instance, which briefly disappears while Android restarts the service. */

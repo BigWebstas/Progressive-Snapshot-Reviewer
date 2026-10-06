@@ -122,5 +122,21 @@
             android:layout_marginTop="8dp"
             android:text="@string/enable_service"
             app:icon="@drawable/ic_accessibility" />
+
+        <TextView
+            android:id="@+id/update_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/update_button"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/check_updates"
+            app:icon="@drawable/ic_refresh" />
     </LinearLayout>
 </ScrollView>

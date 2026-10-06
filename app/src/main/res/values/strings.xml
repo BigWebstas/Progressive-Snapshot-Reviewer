@@ -13,4 +13,13 @@
     <string name="stat_elapsed">Elapsed</string>
     <string name="progressive_missing">Progressive app is not installed</string>
     <string name="enable_first">Enable the accessibility service first</string>
+    <string name="check_updates">Check for updates</string>
+    <string name="install_update">Install update</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_current">You\'re up to date (v%1$s).</string>
+    <string name="update_available">Version %1$s is available (you have v%2$s).</string>
+    <string name="update_downloading">Downloading version %1$s…</string>
+    <string name="update_check_failed">Couldn\'t check for updates.</string>
+    <string name="update_failed">Update failed: %1$s</string>
+    <string name="allow_installs">Allow this app to install updates, then tap Install update again.</string>
 </resources>
