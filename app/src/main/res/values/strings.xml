@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Snapshot Trip Reviewer</string>
+    <string name="service_description">Navigates the Progressive app to your Snapshot trips and opens the transit mode picker for trips with events. It never selects a mode for you.</string>
+    <string name="service_on">Accessibility service is on. Pick a mode on each trip that opens; the next one opens after you save or cancel.</string>
+    <string name="service_off">Accessibility service is off. Turn it on, then start the review.</string>
+    <string name="enable_service">Enable accessibility service</string>
+    <string name="start_review">Start review</string>
+    <string name="stop">Stop</string>
+    <string name="return_to_app">Return</string>
+    <string name="stat_processed">Trips processed</string>
+    <string name="stat_changed">Modes changed</string>
+    <string name="stat_skipped">Skipped (0 events)</string>
+    <string name="stat_elapsed">Elapsed</string>
+    <string name="progressive_missing">Progressive app is not installed</string>
+    <string name="enable_first">Enable the accessibility service first</string>
+</resources>
