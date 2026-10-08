@@ -19,7 +19,8 @@ import com.google.android.material.color.DynamicColors
 
 /**
  * Walks the Progressive app to Snapshot > Trips, and for each trip with events > 0 opens the
- * transit mode picker. It never picks a mode: the user does, then goes back to the trip list.
+ * transit mode picker. Trips detected as a drive are set to Other and saved; for any other trip the
+ * user picks the mode.
  */
 class SnapshotService : AccessibilityService() {
 
@@ -38,6 +39,7 @@ class SnapshotService : AccessibilityService() {
     private val reviewed = mutableSetOf<String>()
     private val skipped = mutableSetOf<String>()
     private var pickerSeen = false
+    private var otherPicked = false
     private var pending: Row? = null
     private var overlay: View? = null
     private var idleTicks = 0
@@ -156,6 +158,7 @@ class SnapshotService : AccessibilityService() {
                     stats.processed++
                     stats.status = "Waiting for you: trip${next.key.trim().trimEnd('.')}"
                     pickerSeen = false
+                    otherPicked = false
                     next.edit.click()
                     setPhase(Phase.WAIT_USER)
                 } else if (!scrollTripList(root, AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) && idleTicks > SCAN_SETTLE_TICKS) {
@@ -168,10 +171,18 @@ class SnapshotService : AccessibilityService() {
                 if (root.find(PICKER_TITLE) != null) {
                     pickerSeen = true
                     idleTicks = 0
+                    if (pending?.mode == DRIVER) reclassifyDrive(root)
                 } else if (pickerSeen) setPhase(Phase.SCAN)
                 else if (idleTicks > GIVE_UP_TICKS) finish("Transit mode picker never opened")
             }
         }
+    }
+
+    /** Drive found: select Other on one tick, then Save transit mode on the next. */
+    private fun reclassifyDrive(root: AccessibilityNodeInfo) {
+        if (!otherPicked) {
+            root.find(OTHER_OPTION)?.click()?.also { otherPicked = true }
+        } else root.find(SAVE_BUTTON)?.click()
     }
 
     /** [mode] is what the trip was set to when opened, so a changed mode can be counted afterwards. */
@@ -233,16 +244,17 @@ class SnapshotService : AccessibilityService() {
     }
 
     /** Clicks the nearest clickable ancestor; falls back to a screen tap when none exists. */
-    private fun AccessibilityNodeInfo.click() {
+    private fun AccessibilityNodeInfo.click(): Unit? {
         var n: AccessibilityNodeInfo? = this
         while (n != null && !n.isClickable) n = n.parent
         if (n != null) {
             n.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            return
+            return Unit
         }
         val r = Rect().also(::getBoundsInScreen)
         val path = Path().apply { moveTo(r.exactCenterX(), r.exactCenterY()) }
         dispatchGesture(GestureDescription.Builder().addStroke(GestureDescription.StrokeDescription(path, 0, 50)).build(), null, null)
+        return Unit
     }
 
     companion object {
@@ -259,6 +271,9 @@ class SnapshotService : AccessibilityService() {
         private val TRIPS_SCREEN = Regex("(?i)^your snapshot.{0,3} trips$")
         private val EDIT_LABEL = Regex("edit transit mode\\.?$")
         private val PICKER_TITLE = Regex("^Which transit mode did you use")
+        private val OTHER_OPTION = Regex("(?i)^other$")
+        private val SAVE_BUTTON = Regex("(?i)^save transit mode$")
+        private const val DRIVER = "Driver"
         private val EVENTS = Regex("(?i)(\\d+)\\s+events?")
 
         var instance: SnapshotService? = null

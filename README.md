@@ -1,6 +1,6 @@
 # Snapshot Trip Reviewer
 
-Android helper for the Progressive app's Snapshot trips. It walks to **Snapshot > Trips**, scrolls the whole list, and opens the transit mode picker for every trip that has events. **You** choose the mode (Driver, Passenger, and so on) and tap Save or Cancel; the app then opens the next trip. It never selects a mode for you.
+Android helper for the Progressive app's Snapshot trips. It walks to **Snapshot > Trips**, scrolls the whole list, and opens the transit mode picker for every trip that has events. Trips detected as a drive are set to **Other** and saved automatically. For any other trip, **you** choose the mode and tap Save or Cancel; the app then opens the next trip.
 
 | Light | Dark | Floating controls |
 | --- | --- | --- |
