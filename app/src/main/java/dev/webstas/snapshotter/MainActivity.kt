@@ -114,7 +114,9 @@ class MainActivity : AppCompatActivity() {
     /** Read from settings rather than the live instance, which briefly disappears while Android restarts the service. */
     private fun serviceEnabled(): Boolean {
         val enabled = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES).orEmpty()
-        return enabled.contains(ComponentName(this, SnapshotService::class.java).flattenToString())
+        val ours = ComponentName(this, SnapshotService::class.java)
+        // Android may store the short form ("pkg/.Class"), so compare parsed components, not strings.
+        return enabled.split(':').any { ComponentName.unflattenFromString(it) == ours }
     }
 
     private fun start() {
